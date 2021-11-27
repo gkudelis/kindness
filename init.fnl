@@ -1,5 +1,10 @@
 (local kind-methods {}) ; methods shared by all kinds
 
+(fn kind-methods.constructor [self name cf]
+  (let [kind-metatable (getmetatable self)
+        value-metatable (. kind-metatable :value-metatable)]
+    (tset self name (fn [...] (setmetatable (cf ...) value-metatable)))))
+
 (fn kind-methods.method [self name function]
   (let [kind-metatable (getmetatable self)
         value-methods (. kind-metatable :value-metatable :__index)]
@@ -12,9 +17,7 @@
   (local value-metatable {:__index value-methods})
   (local kind-metatable {:__index kind-methods :value-metatable value-metatable})
 
-  (fn k.init [] (doto {} (setmetatable value-metatable)))
-
-  (doto k (setmetatable kind-metatable)))
+  (setmetatable k kind-metatable))
 
 ;(fn trait [] {})
 
