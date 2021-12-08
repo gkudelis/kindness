@@ -10,6 +10,19 @@
         value-methods (. kind-metatable :value-metatable :__index)]
     (tset value-methods name function)))
 
+(fn kind-methods.variants [self ...]
+  (let [kind-metatable (getmetatable self)
+        value-metatable (. kind-metatable :value-metatable)
+        variants {...}]
+    (each [name cf (pairs variants)]
+      (tset self name (fn [...] (setmetatable {name (cf ...)} value-metatable))))
+    (self:method :vary (fn [self ...]
+                         (var found-match false)
+                         (each [name f (pairs {...}) :until found-match]
+                           (when (. variants name)
+                             (set found-match true)
+                             (f (. self name))))))))
+
 (fn kind [name]
   (local k {: name})
 
